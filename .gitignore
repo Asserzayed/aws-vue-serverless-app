@@ -1,0 +1,27 @@
+# Terraform files
+terraform/.terraform/*
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform.lock.hcl
+terraform/*.zip
+
+# Node modules and packages
+node_modules/
+package-lock.json
+
+# Environment and config files
+js/config.js
+.env
+.env.*
+
+# IDE specific files
+.vscode/*
+.idea/*
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/
