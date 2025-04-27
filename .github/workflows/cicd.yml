@@ -24,7 +24,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v3
       with:
         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: ${{ secrets.MY_AWS_REGION }}
 
     - name: Setup Terraform (for outputs only)
       uses: hashicorp/setup-terraform@v2
@@ -50,7 +50,7 @@ jobs:
             cognito: {
                 userPoolId: '${USER_POOL_ID}', // e.g. us-east-2_uXboG5pAb
                 userPoolClientId: '${USER_POOL_CLIENT_ID}', // e.g. 25ddkmj4v6hfsfvruhpfi7n4hv
-                region: '${{ secrets.AWS_REGION }}' // e.g. us-east-2
+                region: '${{ secrets.MY_AWS_REGION }}' // e.g. us-east-2
             },
             api: {
                 invokeUrl: '${API_URL}' // e.g. https://rc7nyt4tql.execute-api.us-west-2.amazonaws.com/prod',
