@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v3
       with:
         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
         aws-region: ${{ secrets.AWS_REGION }}
@@ -48,12 +48,12 @@ jobs:
         cat > js/config.js <<EOF
         window._config = {
             cognito: {
-                userPoolId: '${{ env.USER_POOL_ID }}', // e.g. us-east-2_uXboG5pAb
-                userPoolClientId: '${{ env.USER_POOL_CLIENT_ID }}', // e.g. 25ddkmj4v6hfsfvruhpfi7n4hv
+                userPoolId: '${USER_POOL_ID}', // e.g. us-east-2_uXboG5pAb
+                userPoolClientId: '${USER_POOL_CLIENT_ID}', // e.g. 25ddkmj4v6hfsfvruhpfi7n4hv
                 region: '${{ secrets.AWS_REGION }}' // e.g. us-east-2
             },
             api: {
-                invokeUrl: '${{ env.API_URL }}' // e.g. https://rc7nyt4tql.execute-api.us-west-2.amazonaws.com/prod',
+                invokeUrl: '${API_URL}' // e.g. https://rc7nyt4tql.execute-api.us-west-2.amazonaws.com/prod',
             }
         };
         EOF
