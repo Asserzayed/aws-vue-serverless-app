@@ -66,3 +66,9 @@ jobs:
     - name: Invalidate CloudFront Cache
       run: |
         aws cloudfront create-invalidation --distribution-id $(aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?Id=='s3-static-website']].Id" --output text) --paths "/*"
+
+    - name: Output CloudFront Domain
+      id: output-domain
+      run: |
+        echo "CloudFront Domain: ${CLOUDFRONT_ID}"
+        echo "cloudfront-domain=${CLOUDFRONT_ID}" >> $GITHUB_OUTPUT
