@@ -38,10 +38,11 @@ jobs:
     - name: Fetch Terraform Outputs
       id: outputs
       run: |
-        echo "API_URL=$(terraform -chdir=terraform output -raw api_url)" >> $GITHUB_ENV
+        echo "API_URL=$(terraform -chdir=terraform output -raw api-url)" >> $GITHUB_ENV
         echo "USER_POOL_ID=$(terraform -chdir=terraform output -raw user-pool-id)" >> $GITHUB_ENV
         echo "USER_POOL_CLIENT_ID=$(terraform -chdir=terraform output -raw user-pool-client-id)" >> $GITHUB_ENV
         echo "CLOUDFRONT_ID=$(terraform -chdir=terraform output -raw cloudfront-distribution-id)" >> $GITHUB_ENV
+        echo "CLOUDFRONT_DOMAIN=$(terraform -chdir=terraform output -raw cloudfront-distribution-domain)" >> $GITHUB_ENV
         echo "STATIC_BUCKET=$(terraform -chdir=terraform output -raw static-bucket-id)" >> $GITHUB_ENV
 
     - name: Generate config.js
@@ -61,14 +62,14 @@ jobs:
 
     - name: Sync Static Files to S3
       run: |
-        aws s3 sync . s3://${STATIC_BUCKET} --exclude ".git/*" --exclude ".github/*" --cache-control "max-age=300,public" --delete
+        aws s3 sync . s3://${STATIC_BUCKET} --exclude ".git/*" --exclude ".github/*" --exclude "terraform/*" --exclude "*.DS_Store" --cache-control "max-age=300,public" --delete
 
     - name: Invalidate CloudFront Cache
       run: |
-        aws cloudfront create-invalidation --distribution-id $(aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?Id=='s3-static-website']].Id" --output text) --paths "/*"
+        aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_ID} --paths "/*"
 
     - name: Output CloudFront Domain
       id: output-domain
       run: |
-        echo "CloudFront Domain: ${CLOUDFRONT_ID}"
-        echo "cloudfront-domain=${CLOUDFRONT_ID}" >> $GITHUB_OUTPUT
+        echo "CloudFront Domain: ${CLOUDFRONT_DOMAIN}"
+        echo "cloudfront-domain=${CLOUDFRONT_DOMAIN}" >> $GITHUB_OUTPUT
