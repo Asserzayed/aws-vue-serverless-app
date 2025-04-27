@@ -61,14 +61,8 @@ jobs:
 
     - name: Sync Static Files to S3
       run: |
-        aws s3 sync . s3://${{ env.STATIC_BUCKET}} \
-          --exclude ".git/*" \
-          --exclude ".github/*" \
-          --cache-control "max-age=300,public" \
-          --delete
+        aws s3 sync . s3://${STATIC_BUCKET} --exclude ".git/*" --exclude ".github/*" --cache-control "max-age=300,public" --delete
 
     - name: Invalidate CloudFront Cache
       run: |
-        aws cloudfront create-invalidation \
-          --distribution-id ${aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?Id=='s3-static-website']].Id" --output text} \
-          --paths "/*"
+        aws cloudfront create-invalidation --distribution-id ${aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?Id=='s3-static-website']].Id" --output text} --paths "/*"
