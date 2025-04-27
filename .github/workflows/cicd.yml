@@ -38,11 +38,11 @@ jobs:
     - name: Fetch Terraform Outputs
       id: outputs
       run: |
-        echo "API_URL=$(terraform output -raw api_url)" >> $GITHUB_ENV
-        echo "USER_POOL_ID=$(terraform output -raw user-pool-id)" >> $GITHUB_ENV
-        echo "USER_POOL_CLIENT_ID=$(terraform output -raw user-pool-client-id)" >> $GITHUB_ENV
-        echo "CLOUDFRONT_ID=$(terraform output -raw cloudfront-distribution-id)" >> $GITHUB_ENV
-        echo "STATIC_BUCKET=$(terraform output -raw static-bucket-id)" >> $GITHUB_ENV
+        echo "API_URL=$(terraform -chdir=terraform output -raw api_url)" >> $GITHUB_ENV
+        echo "USER_POOL_ID=$(terraform -chdir=terraform output -raw user-pool-id)" >> $GITHUB_ENV
+        echo "USER_POOL_CLIENT_ID=$(terraform -chdir=terraform output -raw user-pool-client-id)" >> $GITHUB_ENV
+        echo "CLOUDFRONT_ID=$(terraform -chdir=terraform output -raw cloudfront-distribution-id)" >> $GITHUB_ENV
+        echo "STATIC_BUCKET=$(terraform -chdir=terraform output -raw static-bucket-id)" >> $GITHUB_ENV
 
     - name: Generate config.js
       run: |
