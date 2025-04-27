@@ -33,7 +33,7 @@ jobs:
         terraform_wrapper: false
 
     - name: Terraform Init (Backend Only)
-      run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET_ID }}" -backend-config="key=terraform/terraform.tfstate" -backend-config="region=${{ secrets.AWS_REGION }}"
+      run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET_ID }}" -backend-config="key=terraform/terraform.tfstate" -backend-config="region=${{ secrets.MY_AWS_REGION }}"
 
     - name: Fetch Terraform Outputs
       id: outputs
