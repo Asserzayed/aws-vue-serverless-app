@@ -65,4 +65,4 @@ jobs:
 
     - name: Invalidate CloudFront Cache
       run: |
-        aws cloudfront create-invalidation --distribution-id ${aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?Id=='s3-static-website']].Id" --output text} --paths "/*"
+        aws cloudfront create-invalidation --distribution-id $(aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?Id=='s3-static-website']].Id" --output text) --paths "/*"
