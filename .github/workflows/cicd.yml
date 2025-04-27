@@ -38,38 +38,45 @@ jobs:
     - name: Fetch Terraform Outputs
       id: outputs
       run: |
-        echo "API_URL=$(terraform -chdir=terraform output -raw api-url)" >> $GITHUB_ENV
-        echo "USER_POOL_ID=$(terraform -chdir=terraform output -raw user-pool-id)" >> $GITHUB_ENV
-        echo "USER_POOL_CLIENT_ID=$(terraform -chdir=terraform output -raw user-pool-client-id)" >> $GITHUB_ENV
-        echo "CLOUDFRONT_ID=$(terraform -chdir=terraform output -raw cloudfront-distribution-id)" >> $GITHUB_ENV
-        echo "CLOUDFRONT_DOMAIN=$(terraform -chdir=terraform output -raw cloudfront-distribution-domain)" >> $GITHUB_ENV
-        echo "STATIC_BUCKET=$(terraform -chdir=terraform output -raw static-bucket-id)" >> $GITHUB_ENV
-
+        echo "API_URL=$(terraform -chdir=terraform output -raw api-url)" >> $GITHUB_OUTPUT
+        echo "USER_POOL_ID=$(terraform -chdir=terraform output -raw user-pool-id)" >> $GITHUB_OUTPUT
+        echo "USER_POOL_CLIENT_ID=$(terraform -chdir=terraform output -raw user-pool-client-id)" >> $GITHUB_OUTPUT
+        echo "CLOUDFRONT_ID=$(terraform -chdir=terraform output -raw cloudfront-distribution-id)" >> $GITHUB_OUTPUT
+        echo "CLOUDFRONT_DOMAIN=$(terraform -chdir=terraform output -raw cloudfront-distribution-domain)" >> $GITHUB_OUTPUT
+        echo "STATIC_BUCKET=$(terraform -chdir=terraform output -raw static-bucket-id)" >> $GITHUB_OUTPUT
+    - name: Mask Terraform Outputs
+      run: |
+        echo "::add-mask::$(echo ${{steps.outputs.outputs.API_URL}})"
+        echo "::add-mask::$(echo ${{steps.outputs.outputs.USER_POOL_ID}})"
+        echo "::add-mask::$(echo ${{steps.outputs.outputs.USER_POOL_CLIENT_ID}})"
+        echo "::add-mask::$(echo ${{steps.outputs.outputs.CLOUDFRONT_ID}})"
+        echo "::add-mask::$(echo ${{steps.outputs.outputs.CLOUDFRONT_DOMAIN}})"
+        echo "::add-mask::$(echo ${{steps.outputs.outputs.STATIC_BUCKET}})"
     - name: Generate config.js
       run: |
         cat > js/config.js <<EOF
         window._config = {
             cognito: {
-                userPoolId: '${USER_POOL_ID}', // e.g. us-east-2_uXboG5pAb
-                userPoolClientId: '${USER_POOL_CLIENT_ID}', // e.g. 25ddkmj4v6hfsfvruhpfi7n4hv
+                userPoolId: '${{ steps.outputs.outputs.USER_POOL_ID }}', // e.g. us-east-2_uXboG5pAb
+                userPoolClientId: '${{ steps.outputs.outputs.USER_POOL_CLIENT_ID }}', // e.g. 25ddkmj4v6hfsfvruhpfi7n4hv
                 region: '${{ secrets.MY_AWS_REGION }}' // e.g. us-east-2
             },
             api: {
-                invokeUrl: '${API_URL}' // e.g. https://rc7nyt4tql.execute-api.us-west-2.amazonaws.com/prod',
+                invokeUrl: '${{ steps.outputs.outputs.API_URL }}' // e.g. https://rc7nyt4tql.execute-api.us-west-2.amazonaws.com/prod',
             }
         };
         EOF
 
     - name: Sync Static Files to S3
       run: |
-        aws s3 sync . s3://${STATIC_BUCKET} --exclude ".git/*" --exclude ".github/*" --exclude "terraform/*" --exclude "*.DS_Store" --cache-control "max-age=300,public" --delete
+        aws s3 sync . s3://${{ steps.outputs.outputs.STATIC_BUCKET }} --exclude ".git/*" --exclude ".github/*" --exclude "terraform/*" --exclude "*.DS_Store" --cache-control "max-age=300,public" --delete
 
     - name: Invalidate CloudFront Cache
       run: |
-        aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_ID} --paths "/*"
+        aws cloudfront create-invalidation --distribution-id ${{ steps.outputs.outputs.CLOUDFRONT_ID }} --paths "/*"
 
     - name: Output CloudFront Domain
       id: output-domain
       run: |
-        echo "CloudFront Domain: ${CLOUDFRONT_DOMAIN}"
-        echo "cloudfront-domain=${CLOUDFRONT_DOMAIN}" >> $GITHUB_OUTPUT
+        echo "CloudFront Domain: ${{ steps.outputs.outputs.CLOUDFRONT_DOMAIN }}"
+        echo "cloudfront-domain=${{ steps.outputs.outputs.CLOUDFRONT_DOMAIN }}" >> $GITHUB_OUTPUT
