@@ -25,10 +25,14 @@ resource "aws_s3_bucket_ownership_controls" "static_website" {
 resource "aws_s3_bucket_public_access_block" "static_website" {
   bucket = aws_s3_bucket.static_website.id
 
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_cloudfront_origin_access_identity" "oai" {
+  comment = "OAI for my static site"
 }
 
 resource "aws_s3_bucket_policy" "bucket-policy" {
@@ -38,7 +42,7 @@ resource "aws_s3_bucket_policy" "bucket-policy" {
 
 data "aws_iam_policy_document" "bucket-policy" {
   statement {
-    sid    = "AllowPublicRead"
+    sid    = "AllowCloudFrontOAIAccess"
     effect = "Allow"
     resources = [
       "${aws_s3_bucket.static_website.arn}",
@@ -46,8 +50,8 @@ data "aws_iam_policy_document" "bucket-policy" {
     ]
     actions = ["S3:GetObject"]
     principals {
-      type        = "*"
-      identifiers = ["*"]
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.oai.iam_arn]
     }
   }
 
@@ -55,12 +59,52 @@ data "aws_iam_policy_document" "bucket-policy" {
   # Ensure the bucket policy is applied after the public access block
 }
 
-resource "aws_s3_bucket_website_configuration" "static_website_config" {
-  bucket = aws_s3_bucket.static_website.id
-
-  index_document {
-    suffix = "index.html"
+resource "aws_cloudfront_distribution" "cdn" {
+  origin {
+    domain_name = aws_s3_bucket.static_website.bucket_regional_domain_name
+    origin_id   = "s3-static-website"
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
+    }
   }
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+
+  default_cache_behavior {
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "s3-static-website"
+    forwarded_values {
+      query_string = true
+      headers = ["Authorization", "Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method"]
+      cookies {
+        forward = "all"
+      }
+    }
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+
+  price_class = "PriceClass_100"
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+    # Optionally add ACM certificate for custom domain
+  }
+
+  tags = {
+    Project = "WildRydes"
+  }
+  depends_on = [ aws_cloudfront_origin_access_identity.oai ]
 }
 
 resource "random_string" "bucket_suffix" {
@@ -73,22 +117,4 @@ resource "random_string" "bucket_suffix" {
   lifecycle {
     create_before_destroy = true # Ensure the resource is recreated before destroying the old one
   }
-
-}
-
-output "static-bucket-id" {
-  value = aws_s3_bucket.static_website.id
-  description = "The ID of the S3 bucket for the static website"
-}
-output "user-pool-id" {
-  value = aws_cognito_user_pool.user_pool.id
-  description = "The ID of the Cognito User Pool"
-}
-output "user-pool-client-id" {
-  value = aws_cognito_user_pool_client.user_pool_client.id
-  description = "The ID of the Cognito User Pool Client"
-}
-output "api-url" {
-  value = aws_api_gateway_deployment.api_deployment.invoke_url
-  description = "The URL of the API Gateway"
 }

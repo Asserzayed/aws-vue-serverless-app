@@ -7,5 +7,5 @@ variable "aws_region" {
 variable "accountId" {
   type        = string
   description = "The AWS account ID"
-  default     = ""
+  default     = "886436959961"
 }

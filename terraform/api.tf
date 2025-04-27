@@ -37,9 +37,8 @@ resource "aws_api_gateway_integration_response" "cors_integration_response" {
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Allow-Methods"     = "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+    "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"      = "'*'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
   depends_on = [aws_api_gateway_method_response.cors_method_response,
   aws_api_gateway_integration.cors_integration]
@@ -58,7 +57,6 @@ resource "aws_api_gateway_method_response" "cors_method_response" {
     "method.response.header.Access-Control-Allow-Headers"     = true
     "method.response.header.Access-Control-Allow-Methods"     = true
     "method.response.header.Access-Control-Allow-Origin"      = true
-    "method.response.header.Access-Control-Allow-Credentials" = true
   }
 }
 
@@ -77,6 +75,16 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.request_unicorn_function.invoke_arn
+}
+
+resource "aws_api_gateway_method_response" "lambda_method_response" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.resource.id
+  http_method = aws_api_gateway_method.lambda_method.http_method
+  status_code = "200"
+  response_models = {
+    "application/json" = "Empty"
+  }
 }
 
 resource "aws_lambda_permission" "apigw_lambda" {
