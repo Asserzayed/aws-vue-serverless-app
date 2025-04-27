@@ -1,5 +1,4 @@
-
-output "cloudfront_distribution_id" {
+output "cloudfront-distribution-id" {
   value       = aws_cloudfront_distribution.cdn.domain_name
   description = "The ID of the CloudFront distribution"
 }
@@ -19,4 +18,13 @@ output "user-pool-client-id" {
 output "api-url" {
   value       = aws_api_gateway_stage.prod_stage.invoke_url
   description = "The URL of the API Gateway"
+}
+output "github-iam-role-arn" {
+  value = aws_iam_role.github-role.arn
+  description = "The ARN of the IAM role for GitHub Actions"
+}
+
+output "state-bucket-id" {
+  value       = data.aws_s3_bucket.tfstate_bucket.bucket
+  description = "The name of the S3 bucket for Terraform state"
 }

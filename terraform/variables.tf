@@ -4,8 +4,9 @@ variable "aws_region" {
   default     = "us-east-1"
 
 }
-variable "accountId" {
+variable "tfstate_bucket_name" {
+  description = "The name of the S3 bucket to store the Terraform state file"
   type        = string
-  description = "The AWS account ID"
-  default     = "886436959961"
+  default     = "asser-terraform-state-bucket"
+  # Override the default value with your own bucket name if needed
 }
