@@ -34,7 +34,7 @@ Estimated monthly costs for original development environment:
 - DynamoDB: Free tier eligible
 - Cognito: Free tier eligible (50K MAU)
 - CodeCommit: ~$1.00/active user/month
-- Amplify: ~$0.01/build minute (~$2 for 200 build minutes)
+- Amplify: ~$0.01/build minute (\~$2 for 200 build minutes)
 - **Total**: ~$5.08/month
 
 Estimated monthly costs for cut-down development environment:
@@ -118,5 +118,5 @@ Option 2 - Local sync:
 cd aws-vue-serverless-app
 # Sync built files to S3
 aws s3 sync . s3://<static-bucket-id> --exclude 
-".git/*" --exclude "terraform/*" --exclude "*.DS_Store"
+".git/*" --exclude ".github/*" --exclude "terraform/*" --exclude "*.DS_Store"
 ```
