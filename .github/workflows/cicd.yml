@@ -38,20 +38,19 @@ jobs:
     - name: Fetch Terraform Outputs
       id: outputs
       run: |
-        echo "API_URL=$(terraform -chdir=terraform output -raw api-url)" >> $GITHUB_OUTPUT
-        echo "USER_POOL_ID=$(terraform -chdir=terraform output -raw user-pool-id)" >> $GITHUB_OUTPUT
-        echo "USER_POOL_CLIENT_ID=$(terraform -chdir=terraform output -raw user-pool-client-id)" >> $GITHUB_OUTPUT
-        echo "CLOUDFRONT_ID=$(terraform -chdir=terraform output -raw cloudfront-distribution-id)" >> $GITHUB_OUTPUT
-        echo "CLOUDFRONT_DOMAIN=$(terraform -chdir=terraform output -raw cloudfront-distribution-domain)" >> $GITHUB_OUTPUT
-        echo "STATIC_BUCKET=$(terraform -chdir=terraform output -raw static-bucket-id)" >> $GITHUB_OUTPUT
-    - name: Mask Terraform Outputs
-      run: |
-        echo "::add-mask::$(echo ${{steps.outputs.outputs.API_URL}})"
-        echo "::add-mask::$(echo ${{steps.outputs.outputs.USER_POOL_ID}})"
-        echo "::add-mask::$(echo ${{steps.outputs.outputs.USER_POOL_CLIENT_ID}})"
-        echo "::add-mask::$(echo ${{steps.outputs.outputs.CLOUDFRONT_ID}})"
-        echo "::add-mask::$(echo ${{steps.outputs.outputs.CLOUDFRONT_DOMAIN}})"
-        echo "::add-mask::$(echo ${{steps.outputs.outputs.STATIC_BUCKET}})"
+        terraform -chdir=terraform output -json > outputs.json
+        echo "API_URL=$(jq -r '.["api_url"].value' outputs.json)" >> $GITHUB_OUTPUT
+        echo "USER_POOL_ID=$(jq -r '.["user-pool-id"].value' outputs.json)" >> $GITHUB_OUTPUT
+        echo "USER_POOL_CLIENT_ID=$(jq -r '.["user-pool-client-id"].value' outputs.json)" >> $GITHUB_OUTPUT
+        echo "CLOUDFRONT_ID=$(jq -r '.["cloudfront-distribution-id"].value' outputs.json)" >> $GITHUB_OUTPUT
+        echo "CLOUDFRONT_DOMAIN=$(jq -r '.["cloudfront-distribution-domain"].value' outputs.json)" >> $GITHUB_OUTPUT
+        echo "STATIC_BUCKET_ID=$(jq -r '.["static-bucket-id"].value' outputs.json)" >> $GITHUB_OUTPUT
+        echo "::add-mask::$(jq -r '.["api_url"].value' outputs.json)"
+        echo "::add-mask::$(jq -r '.["user-pool-id"].value' outputs.json)"
+        echo "::add-mask::$(jq -r '.["user-pool-client-id"].value' outputs.json)"
+        echo "::add-mask::$(jq -r '.["cloudfront-distribution-id"].value' outputs.json)"
+        echo "::add-mask::$(jq -r '.["static-bucket-id"].value' outputs.json)" 
+        rm outputs.json    
     - name: Generate config.js
       run: |
         cat > js/config.js <<EOF
@@ -69,7 +68,7 @@ jobs:
 
     - name: Sync Static Files to S3
       run: |
-        aws s3 sync . s3://${{ steps.outputs.outputs.STATIC_BUCKET }} --exclude ".git/*" --exclude ".github/*" --exclude "terraform/*" --exclude "*.DS_Store" --cache-control "max-age=300,public" --delete
+        aws s3 sync . s3://${{ steps.outputs.outputs.STATIC_BUCKET_ID }} --exclude ".git/*" --exclude ".github/*" --exclude "terraform/*" --exclude "*.DS_Store" --cache-control "max-age=300,public" --delete
 
     - name: Invalidate CloudFront Cache
       run: |
