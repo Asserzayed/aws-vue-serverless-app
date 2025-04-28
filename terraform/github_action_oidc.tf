@@ -21,7 +21,7 @@ data "aws_iam_policy_document" "github-assume-role-policy" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:Asserzayed/aws-vue-serverless-app:*"]
+      values   = ["repo:${var.organization_repo}:*"]
     }
   }
 }

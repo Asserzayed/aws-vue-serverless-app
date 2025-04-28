@@ -1,6 +1,11 @@
-output "cloudfront-distribution-id" {
+output "cloudfront-distribution-domain" {
   value       = aws_cloudfront_distribution.cdn.domain_name
-  description = "The ID of the CloudFront distribution"
+  description = "The domain name of the CloudFront distribution"
+}
+
+output "cloudfront-distribution-id" {
+  value       = aws_cloudfront_distribution.cdn.id
+  description = "The ID of the CloudFront distribution id"
 }
 
 output "static-bucket-id" {
