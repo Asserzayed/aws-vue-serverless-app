@@ -38,13 +38,13 @@ jobs:
       id: outputs
       run: |
         terraform -chdir=terraform output -json > outputs.json
-        echo "API_URL=$(jq -r '.["api_url"].value' outputs.json)" >> $GITHUB_OUTPUT
+        echo "API_URL=$(jq -r '.["api-url"].value' outputs.json)" >> $GITHUB_OUTPUT
         echo "USER_POOL_ID=$(jq -r '.["user-pool-id"].value' outputs.json)" >> $GITHUB_OUTPUT
         echo "USER_POOL_CLIENT_ID=$(jq -r '.["user-pool-client-id"].value' outputs.json)" >> $GITHUB_OUTPUT
         echo "CLOUDFRONT_ID=$(jq -r '.["cloudfront-distribution-id"].value' outputs.json)" >> $GITHUB_OUTPUT
         echo "CLOUDFRONT_DOMAIN=$(jq -r '.["cloudfront-distribution-domain"].value' outputs.json)" >> $GITHUB_OUTPUT
         echo "STATIC_BUCKET_ID=$(jq -r '.["static-bucket-id"].value' outputs.json)" >> $GITHUB_OUTPUT
-        echo "::add-mask::$(jq -r '.["api_url"].value' outputs.json)"
+        echo "::add-mask::$(jq -r '.["api-url"].value' outputs.json)"
         echo "::add-mask::$(jq -r '.["user-pool-id"].value' outputs.json)"
         echo "::add-mask::$(jq -r '.["user-pool-client-id"].value' outputs.json)"
         echo "::add-mask::$(jq -r '.["cloudfront-distribution-id"].value' outputs.json)"
