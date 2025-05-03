@@ -120,3 +120,6 @@ cd aws-vue-serverless-app
 aws s3 sync . s3://<static-bucket-id> --exclude 
 ".git/*" --exclude ".github/*" --exclude "terraform/*" --exclude "*.DS_Store"
 ```
+
+### Contributor
+- Linkedin: [Asser M. Zayed](https://www.linkedin.com/in/asser-zayed/)
